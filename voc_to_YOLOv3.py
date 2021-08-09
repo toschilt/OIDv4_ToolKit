@@ -3,8 +3,8 @@ from os import getcwd
 import os
 
 
-dataset_train = 'OID\\Dataset\\train\\'
-dataset_file = '4_CLASS_test.txt'
+dataset_train = 'Dataset/train/'
+dataset_file = '1_CLASS_test.txt'
 classes_file = dataset_file[:-4]+'_classes.txt'
 
 
@@ -19,13 +19,17 @@ def test(fullname):
     tree=ET.parse(in_file)
     root = tree.getroot()
     for i, obj in enumerate(root.iter('object')):
-        difficult = obj.find('difficult').text
+        if(obj.find('difficult') != None):
+            difficult = obj.find('difficult').text
+        else:
+            difficult = 0
+
         cls = obj.find('name').text
         if cls not in CLS or int(difficult)==1:
             continue
         cls_id = CLS.index(cls)
         xmlbox = obj.find('bndbox')
-        b = (int(xmlbox.find('xmin').text), int(xmlbox.find('ymin').text), int(xmlbox.find('xmax').text), int(xmlbox.find('ymax').text))
+        b = (int(float(xmlbox.find('xmin').text)), int(float(xmlbox.find('ymin').text)), int(float(xmlbox.find('xmax').text)), int(float(xmlbox.find('ymax').text)))
         bb += (" " + ",".join([str(a) for a in b]) + ',' + str(cls_id))
 
         # we need this because I don't know overlapping or something like that
@@ -48,7 +52,7 @@ for CLASS in classes:
     for filename in os.listdir(CLASS):
         if not filename.endswith('.xml'):
             continue
-        fullname = os.getcwd()+'\\'+CLASS+'\\'+filename
+        fullname = os.getcwd()+'/'+CLASS+'/'+filename
         test(fullname)
 
 for CLASS in CLS:
